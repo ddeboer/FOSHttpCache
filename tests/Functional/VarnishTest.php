@@ -142,10 +142,12 @@ class VarnishTest extends VarnishTestCase
             'cookies' => array('role-1')
         ))->send();
         $this->assertEquals('Content for role 1', $cachedResponse1->getBody(true));
+        $this->assertHit($cachedResponse1);
 
         $cachedResponse2 = $this->getClient()->get('/head.php', array(), array(
             'cookies' => array('role-2')
         ))->send();
         $this->assertEquals('Content for role 2', $cachedResponse2->getBody(true));
+        $this->assertHit($cachedResponse2);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+header('X-Cache-Debug: 1');
+
 // The application listens to HEAD requests and creates an X-Hash based on
 // parameters in the request. In this case (vary by user role), it's based
 // on Cookie.
@@ -13,6 +15,7 @@ if ('HEAD' == strtoupper($_SERVER['REQUEST_METHOD'])) {
 
 // Handle normal GET requests
 header('Cache-Control: max-age=3600');
+header('Vary: X-Hash');
 
 switch ($_SERVER['HTTP_X_HASH']) {
     case 'role-1':

@@ -15,7 +15,7 @@ sub vcl_recv {
 
     if (req.restarts > 0 && req.request == "HEAD") {
         set req.request = "GET";
-        return (pass);
+        unset req.http.cookie;
     }
 
     if (req.request == "PURGE") {
