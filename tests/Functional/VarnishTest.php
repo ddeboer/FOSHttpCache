@@ -4,6 +4,7 @@ namespace FOS\HttpCache\Tests\Functional;
 
 use FOS\HttpCache\Invalidation\Varnish;
 use FOS\HttpCache\Tests\VarnishTestCase;
+use Guzzle\Http\Client;
 
 /**
  * @group webserver
@@ -123,5 +124,28 @@ class VarnishTest extends VarnishTestCase
 
         $this->assertHit($this->getResponse('/negotation.php', $json));
         $this->assertMiss($this->getResponse('/negotation.php', $html));
+    }
+
+    public function testVaryCacheByApplicationHash()
+    {
+        $response1 = $this->getClient()->get('/head.php', array(), array(
+            'cookies' => array('role-1')
+        ))->send();
+        $this->assertEquals('Content for role 1', $response1->getBody(true));
+
+        $response2 = $this->getClient()->get('/head.php', array(), array(
+            'cookies' => array('role-2')
+        ))->send();
+        $this->assertEquals('Content for role 2', $response2->getBody(true));
+
+        $cachedResponse1 = $this->getClient()->get('/head.php', array(), array(
+            'cookies' => array('role-1')
+        ))->send();
+        $this->assertEquals('Content for role 1', $cachedResponse1->getBody(true));
+
+        $cachedResponse2 = $this->getClient()->get('/head.php', array(), array(
+            'cookies' => array('role-2')
+        ))->send();
+        $this->assertEquals('Content for role 2', $cachedResponse2->getBody(true));
     }
 }

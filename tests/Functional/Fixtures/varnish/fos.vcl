@@ -8,6 +8,16 @@ acl invalidators {
 }
 
 sub vcl_recv {
+    if (req.restarts == 0 && req.http.cookie) {
+        set req.request = "HEAD";
+        return (pass);
+    }
+
+    if (req.restarts > 0 && req.request == "HEAD") {
+        set req.request = "GET";
+        return (pass);
+    }
+
     if (req.request == "PURGE") {
         if (!client.ip ~ invalidators) {
             error 405 "Not allowed";
@@ -74,5 +84,10 @@ sub vcl_deliver {
         # Remove ban-lurker friendly custom headers when delivering to client
         unset resp.http.x-url;
         unset resp.http.x-host;
+    }
+
+    if (req.request == "HEAD" && resp.http.x-hash) {
+        set req.http.x-hash = resp.http.x-hash;
+        return (restart);
     }
 }
